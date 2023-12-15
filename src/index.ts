@@ -8,16 +8,16 @@ import {
   import dotenv from 'dotenv';
   import { Vendor } from './types/vendor';
   
-  dotenv.config();
+  dotenv.config(); //???
   
   const init = async () => {
     const TABLE_NAME_CONST = 'vendors';
-      const res = dynamodbDescribeTable(TABLE_NAME_CONST);
-      console.log(res);
+      // const res = dynamodbDescribeTable(TABLE_NAME_CONST);
+      // console.log(res);
   
-    //   const scanIterator = await dynamodbScanTable(TABLE_NAME_CONST, 5);
-    //   console.log((await scanIterator.next()).value);
-    //   console.log((await scanIterator.next()).value);
+      const scanIterator = await dynamodbScanTable(TABLE_NAME_CONST, 5);
+      console.log((await scanIterator.next()).value);
+      console.log((await scanIterator.next()).value);
   
     //   const vendors = await getAllScanResults<Vendor>(
     //     process.env.AWS_VENDORS_TABLE_NAME ?? ''
@@ -49,8 +49,8 @@ import {
     // );
   
     await sqsSendMessage(
-      'https://sqs.us-east-1.amazonaws.com/525480118775/testqueue1',
-      'testMsg1'
+      'https://sqs.us-east-1.amazonaws.com/656203730697/MyQueue',
+      ',MyQueue'
     );
   };
   
