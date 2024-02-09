@@ -1,0 +1,21 @@
+{
+  "name": "Location-Tracking-System-Vendor-Twitter",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/c82guochen/Location-Tracking-System-Vendor-Twitter.git",
+  "author": "Chen Guo <c82guo@uwaterloo.ca>",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/util-dynamodb": "^3.509.0",
+    "aws-sdk": "^2.1554.0",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "needle": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/needle": "^3.3.0",
+    "@types/node": "^20.11.17",
+    "typescript": "^5.3.3"
+  }
+}
