@@ -41,6 +41,8 @@ export const dynamodbScanTable = async function* (
   tableName: string,
   limit: number = 25,
   lastEvaluatedKey?: AWS.DynamoDB.Key
+  // 上一次被retrieve的最后一个object（是为了方便分页）
+  // 这里加问号是因为该变量不是必要的
 ) {
   while (true) {
     const params: AWS.DynamoDB.ScanInput = {
@@ -50,18 +52,24 @@ export const dynamodbScanTable = async function* (
 
     if (lastEvaluatedKey) {
       params.ExclusiveStartKey = lastEvaluatedKey;
+      // 如果lastEvaluatedKey存在，表明之前的 Scan 或 Query 操作没有检索到表中的所有数据，而是返回了一个 LastEvaluatedKey。
+      // 将 lastEvaluatedKey 赋值给 params.ExclusiveStartKey，代码设置了 Scan 或 Query 请求的起始点
     }
+    //如果 lastEvaluatedKey 不存在，说明没有之前的检索操作，或者前一次检索已经到达了数据集的末尾。
 
     try {
       const result = await dynamodb.scan(params).promise();
       if (!result.Count) {
-        return;
+        // result.Count是 scan 操作返回的对象中的一个属性，表示检索到的项的数量。
+        return; //如果为0的话，就直接return，意为到了表底，退出循环
       }
 
       lastEvaluatedKey = (result as AWS.DynamoDB.ScanOutput)
         .LastEvaluatedKey;
+      // 如果 LastEvaluatedKey 存在，您可以在随后的 scan 操作中将其用作 ExclusiveStartKey，以继续从上次停止的地方检索更多的数据。
 
       result.Items = result.Items?.map((item) => unmarshall(item));
+      // map 函数会遍历 Items 数组中的每一个项，并且对每个项调用 unmarshall 函数。unmarshall 函数将每个 DynamoDB 项的格式转换为普通的 JavaScript 对象。
 
       yield result;
     } catch (e) {
