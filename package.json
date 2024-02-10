@@ -5,6 +5,9 @@
   "repository": "https://github.com/c82guochen/Location-Tracking-System-Vendor-Twitter.git",
   "author": "Chen Guo <c82guo@uwaterloo.ca>",
   "license": "MIT",
+  "scripts": {
+    "start": "node \"build/index.js\""
+  },
   "dependencies": {
     "@aws-sdk/util-dynamodb": "^3.509.0",
     "aws-sdk": "^2.1554.0",
