@@ -83,18 +83,25 @@ export const dynamodbScanTable = async function* (
 
 // 3 - Get All Scan Results
 export const getAllScanResults = async <T>(
+  // 是泛型异步函数，<T> 表示它可以处理不同类型的返回结果。
+  // 此处指该函数将返回一个 Promise<T> 类型的对象
   tableName: string,
   limit: number = 25
 ) => {
   try {
     await dynamodbDescribeTable(tableName);
+    // 确认指定的 DynamoDB 表是否存在。
     const scanTableGen = await dynamodbScanTable(tableName, limit);
-
+    
+    // 这里的T代表泛型，因为原本的result作为被返回的结果类型不明确，用T表示
     const res: T[] = [];
+    // T[]:指明 res 是一个数组，数组中的元素类型为 T。
+    // = []初始化 res 为一个空数组。由于类型注解 T[]，这个空数组将被视为一个包含类型 T 元素的数组。
 
     let isDone = false;
 
     while (!isDone) {
+      // use .next to call the function* generator
       const iterator = await scanTableGen.next();
 
       if (!iterator) {
@@ -102,10 +109,16 @@ export const getAllScanResults = async <T>(
       }
 
       if (iterator.done || !iterator.value.LastEvaluatedKey) {
+        // iterator.done 是一个布尔值，当生成器完成所有迭代时为 true。
+        // !iterator.value.LastEvaluatedKey 检查 DynamoDB 返回的最后一个评估键是否存在。如果不存在，表示没有更多的数据可以检索。
+        // 该项为True的情况有两种，已到达数据集末尾或者数据集小于单次检索限制
         isDone = true;
       }
 
       if (iterator.value) {
+        // iterator.value 包含了当前批次的 DynamoDB 数据。
+        // iterator.value.Items! 是当前批次的数据项数组。
+        // 感叹号(!) 是 TypeScript 的非空断言操作符，用于告诉编译器 Items 属性是存在的。
         iterator.value.Items!.forEach((item: any) => res.push(item));
       }
     }
