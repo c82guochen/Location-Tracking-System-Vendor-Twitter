@@ -80,3 +80,41 @@ export const dynamodbScanTable = async function* (
     }
   }
 };
+
+// 3 - Get All Scan Results
+export const getAllScanResults = async <T>(
+  tableName: string,
+  limit: number = 25
+) => {
+  try {
+    await dynamodbDescribeTable(tableName);
+    const scanTableGen = await dynamodbScanTable(tableName, limit);
+
+    const res: T[] = [];
+
+    let isDone = false;
+
+    while (!isDone) {
+      const iterator = await scanTableGen.next();
+
+      if (!iterator) {
+        throw new Error('No iterator returned');
+      }
+
+      if (iterator.done || !iterator.value.LastEvaluatedKey) {
+        isDone = true;
+      }
+
+      if (iterator.value) {
+        iterator.value.Items!.forEach((item: any) => res.push(item));
+      }
+    }
+
+    return res;
+  } catch (e) {
+    if (e instanceof Error) {
+      throw e;
+    }
+    throw new Error('getAllScanResults unexpected error');
+  }
+};
