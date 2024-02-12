@@ -1,6 +1,7 @@
-import { unmarshall } from '@aws-sdk/util-dynamodb';
 import AWS from 'aws-sdk';
 import dotenv from 'dotenv';
+import { TweetFormatted } from './types/twitter';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 dotenv.config();
 // 加载 .env 文件中定义的环境变量到 process.env，这使得在代码中可以方便地使用这些变量。
@@ -34,7 +35,7 @@ export const dynamodbDescribeTable = async (tableName: string) => {
   }
 };
 
-// 2 - Scan method
+// 2 - Scan method（目的是做pagination）
 export const dynamodbScanTable = async function* (
   // 这里的function*是指该函数为generator，允许函数按需生成一系列值，而不是一次性返回一个单一值。
   // 因此需要搭配yield实现 
@@ -93,7 +94,7 @@ export const getAllScanResults = async <T>(
     // 确认指定的 DynamoDB 表是否存在。
     const scanTableGen = await dynamodbScanTable(tableName, limit);
     
-    // 这里的T代表泛型，因为原本的result作为被返回的结果类型不明确，用T表示
+    // 这里的T代表泛型，因为从db返回的结果类型不明确，用T表示
     const res: T[] = [];
     // T[]:指明 res 是一个数组，数组中的元素类型为 T。
     // = []初始化 res 为一个空数组。由于类型注解 T[]，这个空数组将被视为一个包含类型 T 元素的数组。
@@ -129,5 +130,47 @@ export const getAllScanResults = async <T>(
       throw e;
     }
     throw new Error('getAllScanResults unexpected error');
+  }
+};
+
+// 4 - Update Tweet field( after parsing)
+export const dynamodbUpdateTweet = async (
+  tableName: string,
+  tweet: TweetFormatted,
+  twitterId: string
+) => {
+  try {
+    const params: AWS.DynamoDB.UpdateItemInput = {
+      TableName: tableName,
+      Key: marshall({ twitterId: twitterId }),
+      // { "twitterId": { "S": "someTwitterIdValue" } }
+      UpdateExpression:
+        // set是 DynamoDB 更新表达式的关键字，用于指示要更新或添加的属性。
+        // 在 DynamoDB 的表达式中，# 前缀用于属性名的占位符，以避免与 DynamoDB 的保留关键字冲突。实际的属性名在 ExpressionAttributeNames 中定义，这里 #tweets 对应于表中的 tweets 属性。
+        // list_append(...): 用于将一个或多个项附加到一个现有的列表类型的属性上。如果该属性不存在，将创建一个新列表。
+        // if_not_exists(#tweets, :empty_list)是条件函数，用于检查 tweets 属性是否存在。如果 tweets 存在，则返回其值；如果不存在，则返回 :empty_list（这里是一个空列表）。
+        // :tweet: 这是一个表达式属性值的占位符，用于在表达式中引用一个值。实际的值在 ExpressionAttributeValues 中定义。这里 :tweet 对应于要追加到 tweets 列表中的新推文。
+        'set #tweets = list_append(if_not_exists(#tweets, :empty_list), :tweet), #updated = :updated',
+      ExpressionAttributeNames: {
+        '#tweets': 'tweets',
+        '#updated': 'updated',
+      },
+      ExpressionAttributeValues: marshall({
+        // 在 DynamoDB 的 UpdateExpression 中使用 ExpressionAttributeValues 时，需要将单个 tweet 对象封装成一个数组。
+        // 因为 list_append 函数期望它的参数是两个列表（数组），并将第二个列表中的元素追加到第一个列表的末尾。
+        ':tweet': [tweet],
+        ':updated': Date.now(),
+        ':empty_list': [],
+      }),
+    };
+
+    const result = await dynamodb.updateItem(params).promise();
+    console.log('Tweet added to record!');
+    return result;
+  } catch (e) {
+    if (e instanceof Error) {
+      throw e;
+    }
+    throw new Error('dynamodbUpdateTweet error object unknown type');
   }
 };
