@@ -60,3 +60,27 @@ export const setRules = async (rules: Rule[]) => {
     throw new Error('setRules unexpected error');
   }
 };
+
+// Get rules
+export const getAllRules = async () => {
+  try {
+    const res = await needle('get', RULES_URL, {
+      headers: {
+        authorization: `Bearer ${TOKEN}`,
+      },
+    });
+
+    if (res.statusCode !== 200) {
+      throw new Error(
+        `getAllRules error response: ${res.statusCode} ${res.statusMessage}`
+      );
+    }
+
+    return res.body;
+  } catch (e) {
+    if (e instanceof Error) {
+      throw e;
+    }
+    throw new Error('getAllRules unexpected error');
+  }
+};
