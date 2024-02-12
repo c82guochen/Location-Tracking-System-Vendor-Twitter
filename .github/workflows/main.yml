@@ -3,7 +3,7 @@ name: 'Build Twitter service'
 on:
   push:
     branches:
-      - 5_aws_helper_2
+      - 7_set_rules
   pull_request:
 permissions:
   id-token: write
@@ -127,7 +127,7 @@ jobs:
       - name: Terraform Apply
         id: apply
         working-directory: ./terraform
-        if: github.ref == 'refs/heads/5_aws_helper_2' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/7_set_rules' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
         env:
           TF_VAR_image_tag: ${{ github.sha }}
