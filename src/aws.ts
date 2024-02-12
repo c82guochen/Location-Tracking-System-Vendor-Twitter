@@ -14,9 +14,10 @@ AWS.config.update({ region: process.env.AWS_REGION });
 // process.env.AWS_REGION 是一个环境变量，表示 AWS 的区域（例如，us-west-2、eu-central-1 等）。
 // 这个值应该在.env 文件中被定义，如 AWS_REGION = us - west - 2
 
-const { DynamoDB } = AWS;
-
+const { DynamoDB, SQS } = AWS;
+// 使用对象解构，从 AWS 对象中提取 DynamoDB 和 SQS 模块。
 const dynamodb = new DynamoDB();
+const sqs = new SQS();
 
 // 1 - Describe a table
 export const dynamodbDescribeTable = async (tableName: string) => {
@@ -172,5 +173,29 @@ export const dynamodbUpdateTweet = async (
       throw e;
     }
     throw new Error('dynamodbUpdateTweet error object unknown type');
+  }
+};
+
+// 5 - SQS message
+export const sqsSendMessage = async (
+  // 异步函数 sqsSendMessage，用于向 AWS Simple Queue Service (SQS) 队列发送消息。
+  // 接受两个参数：队列的 URL(queueUrl) 和要发送的消息内容(body)。
+  queueUrl: string,
+  body: string
+) => {
+  try {
+    const params: AWS.SQS.SendMessageRequest = {
+      MessageBody: body,
+      QueueUrl: queueUrl,
+    };
+
+    const res = await sqs.sendMessage(params).promise();
+    console.log('Send Message!');
+    return res;
+  } catch (e) {
+    if (e instanceof Error) {
+      throw e;
+    }
+    throw new Error('sqsSendMessage error object unknown type');
   }
 };
