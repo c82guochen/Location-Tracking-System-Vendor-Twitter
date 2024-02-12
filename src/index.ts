@@ -8,7 +8,7 @@ import {
   import dotenv from 'dotenv';
 import { Vendor } from './types/vendor';
 import { Rule } from './types/twitter';
-import { getAllRules, setRules } from './twitter';
+import { deleteAllRules, getAllRules, setRules } from './twitter';
   
   dotenv.config();
   
@@ -70,8 +70,9 @@ import { getAllRules, setRules } from './twitter';
     // // 意味着每当有符合这个规则的推文发布时，这些推文会实时被推送到你的应用程序中。
     
     // await setRules(rules);
-      const rules = await getAllRules();
-      console.log(rules);
-    };
-    
-    init();
+    const rules = await getAllRules();
+    console.log(rules);
+    await deleteAllRules(rules);
+  };
+  
+  init();
