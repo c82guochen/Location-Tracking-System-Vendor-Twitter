@@ -6,7 +6,9 @@ import {
     sqsSendMessage,
   } from './aws';
   import dotenv from 'dotenv';
-  import { Vendor } from './types/vendor';
+import { Vendor } from './types/vendor';
+import { Rule } from './types/twitter';
+import { setRules } from './twitter';
   
   dotenv.config();
   
@@ -47,10 +49,27 @@ import {
     //   'DCTacoTruck'
     // );
   
-    await sqsSendMessage(
-      'https://sqs.us-east-1.amazonaws.com/656203730697/MyQueue',
-      'testMsg1'
-    );
-  };
-  
-  init();
+    // await sqsSendMessage(
+    //   'https://sqs.us-east-1.amazonaws.com/656203730697/MyQueue',
+    //   'testMsg1'
+    //   );
+      
+    const vendors = await getAllScanResults<Vendor>(
+        process.env.AWS_VENDORS_TABLE_NAME ?? ''
+      );
+    
+      const vendorIdList = vendors.map((item) => item.twitterId);
+    
+      const rules: Rule[] = [
+        {
+              value: `has:geo (from:${vendorIdList.join(` OR from:`)})`,
+            // eg. "has:geo (from:vendor1 OR from:vendor2)"
+          tag: 'vendors-geo',
+        },
+      ];
+    // 意味着每当有符合这个规则的推文发布时，这些推文会实时被推送到你的应用程序中。
+    
+      await setRules(rules);
+    };
+    
+    init();
