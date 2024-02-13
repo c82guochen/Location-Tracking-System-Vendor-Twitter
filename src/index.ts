@@ -8,7 +8,7 @@ import {
   import dotenv from 'dotenv';
 import { Vendor } from './types/vendor';
 import { Rule } from './types/twitter';
-import { deleteAllRules, getAllRules, setRules } from './twitter';
+import { deleteAllRules, getAllRules, setRules, streamVendors } from './twitter';
   
   dotenv.config();
   
@@ -70,9 +70,18 @@ import { deleteAllRules, getAllRules, setRules } from './twitter';
     // // 意味着每当有符合这个规则的推文发布时，这些推文会实时被推送到你的应用程序中。
     
     // await setRules(rules);
-    const rules = await getAllRules();
-    console.log(rules);
-    await deleteAllRules(rules);
+    
+    // const rules = await getAllRules();
+    // console.log(rules);
+    // await deleteAllRules(rules);
+
+    const vendors = await getAllScanResults<Vendor>(
+      process.env.AWS_VENDORS_TABLE_NAME ?? ''
+    );
+  
+    const vendorList = vendors.map((vendor) => vendor.twitterId);
+  
+    await streamVendors(vendorList);
   };
   
   init();

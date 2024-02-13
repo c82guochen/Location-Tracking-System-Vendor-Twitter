@@ -252,3 +252,34 @@ export const connectStream = (retryAttempt: number = 0) => {
 
   return stream;
 };
+
+// stream vendors
+export const streamVendors = async (vendorList: String[]) => {
+  try {
+    const currentRules = await getAllRules();
+    // Get current rule firstly, if there is a rule already existed, we need to delete it.
+    // 因为不想特意分出一个表来存储它,而且rule需要唯一
+    if (currentRules.hasOwnProperty('data')) {
+      await deleteAllRules(currentRules);
+    }
+
+    connectStream();
+    // 这个是异步的，所以一定会发生在下一行的定义rule之后
+    
+    const rules: Rule[] = [
+    // 重新定义一下rule
+      {
+        value: `has:geo (from:${vendorList.join(' OR from')})`,
+        tag: 'vendors-geo',
+      },
+    ];
+
+    await setRules(rules);
+  } catch (e) {
+    if (e instanceof Error) {
+      throw e;
+    }
+
+    throw new Error('streamVendors unexpected error');
+  }
+};
