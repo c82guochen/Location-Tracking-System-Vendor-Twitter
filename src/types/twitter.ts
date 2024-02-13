@@ -20,12 +20,12 @@ export interface User {
     description: string;
   }
   
-export interface Place {
+  export interface Place {
     id: string;
     name: string;
     place_type: string;
     country: string;
-    country_type: string;
+    country_code: string;
     full_name: string;
     geo: {
       type: string;
@@ -33,6 +33,7 @@ export interface Place {
       properties: any;
     };
   }
+  
   
 export interface TweetRaw {
     author_id: string;
