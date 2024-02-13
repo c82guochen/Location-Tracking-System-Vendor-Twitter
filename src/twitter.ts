@@ -6,7 +6,7 @@ import needle from 'needle';
 // 轻量级的 Node.js HTTP 客户端，常用于发送 HTTP 请求。
 // 这个库提供了简洁的 API 来处理各种 HTTP 请求（如 GET, POST）和处理响应。
 import dotenv from 'dotenv';
-import { Rule } from './types/twitter';
+import { Rule, TweetFormatted, TweetStream } from './types/twitter';
 
 dotenv.config();
 
@@ -120,5 +120,43 @@ export const deleteAllRules = async (rules: any) => {
       throw e;
     }
     throw new Error('deleteAllRules unexpected error');
+  }
+};
+
+// Parse tweet
+const parseTweet = (stream: TweetStream): TweetFormatted | Error => {
+  try {
+    // 每次connection sends out data wrapped in a array，也就是该array只包含有一个data
+    //  如果多个用户同时发生变化，就会有多个array
+    const user = stream.includes.users[0];
+    const tweet = stream.includes.tweets[0];
+    const place = stream.includes.places[0];
+
+    
+    return {
+      id: tweet.id,
+      userName: user.name,
+      userId: user.username,
+      text: tweet.text,
+      date: tweet.created_at,
+      geo: {
+        id: place.id,
+        name: place.name,
+        full_name: place.full_name,
+        place_type: place.place_type,
+        country: place.country,
+        country_code: place.country_code,
+        coordinates: {
+          long: place.geo.bbox[0],
+          lat: place.geo.bbox[1],
+        },
+      },
+    };
+  } catch (e) {
+    if (e instanceof Error) {
+      return e;
+    }
+
+    throw new Error('parseTweet unexpected error');
   }
 };
