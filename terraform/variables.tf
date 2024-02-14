@@ -20,7 +20,7 @@ variable "aws_region" {}
 variable "app_name" {
   type        = string
   description = "Application Name"
-  default = "Location-Tracking-System-Vendor-Twitter"
+  default = "Vendor-Twitter"
 }
 
 // 在AWS (Amazon Web Services) 的环境中，ecs_env_vars.json文件通常用于定义环境变量
