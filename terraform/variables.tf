@@ -23,6 +23,8 @@ variable "app_name" {
   default = "Location-Tracking-System-Vendor-Twitter"
 }
 
+// 在AWS (Amazon Web Services) 的环境中，ecs_env_vars.json文件通常用于定义环境变量
+// 这些环境变量会被AWS的ECS（Elastic Container Service）服务用于容器的配置
 // 该文件不会上传到github中，会被手动存到S3中
 variable "ecs_twitter_env_secrets_key" {
   description = "Secrets key file"
@@ -32,6 +34,7 @@ variable "ecs_twitter_env_secrets_key" {
 variable "ecs_twitter_env_secrets_folder" {
   description = "Secrets S3 folder"
   default = "cg-vendor-twitter-secrets"
+    # 存放文件的路径（bucket需要aws全局unique）
 } 
 
 variable "dynamodb_vendor_table_name" {
