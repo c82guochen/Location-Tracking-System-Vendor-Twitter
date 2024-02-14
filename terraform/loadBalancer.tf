@@ -22,6 +22,7 @@ resource "aws_security_group" "lb_sg" {
     ipv6_cidr_blocks = ["::/0"]
   }
 }
+
 # 决定该load balancer将挂载到哪个application上
 # application balancer（alb）
 resource "aws_alb" "alb" {

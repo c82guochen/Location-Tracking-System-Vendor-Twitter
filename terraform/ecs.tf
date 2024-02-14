@@ -23,6 +23,8 @@ resource "aws_security_group" "ecs_sg" {
     protocol = "-1" // 接收所有协议
     security_groups = [aws_security_group.lb_sg.id]
   }
+  # 这个入站规则允许从指定安全组（aws_security_group.lb_sg.id，可能是负载均衡器的安全组）中的所有端口和所有协议的流量进入。
+  # 这意味着，只有从这个指定安全组的资源（如负载均衡器）发起的连接才被允许访问使用这个安全组的ECS服务。
 
   // 输出
   egress {
@@ -32,7 +34,11 @@ resource "aws_security_group" "ecs_sg" {
     cidr_blocks = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
+  # 出站规则允许从使用该安全组的资源到任何目的地（IPv4使用0.0.0.0/0，IPv6使用::/0）的所有端口和协议的流量。
+  # 这实现了允许容器（或资源）向外部发起连接的需求。
 }
+# 通过这种配置方式，你的ECS服务（或任何使用这个安全组的AWS资源）被配置为仅接受来自特定源（如负载均衡器）的入站连接，同时可以自由地向任何外部目的地发起出站连接。
+# 这有助于保护你的ECS服务不受未经授权的外部访问，同时不限制其访问外部服务和资源的能力
 
 // bucket和其中的文件
 data "aws_s3_bucket_object" "secrets" {
