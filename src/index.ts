@@ -3,7 +3,6 @@ import { dynamodbDescribeTable, dynamodbScanTable } from './aws';
 const init = async () => {
   const TABLE_NAME_CONST = 'vendors';
   const res = await dynamodbDescribeTable(TABLE_NAME_CONST);
-  console.log(res);
 
     const scanIterator = await dynamodbScanTable(TABLE_NAME_CONST, 5);
     let data = await scanIterator.next();
